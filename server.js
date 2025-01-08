@@ -13,6 +13,11 @@ server.on('connection', (socket) => {
   console.log('A new connection to the server');
   const clientId = clients.length + 1;
 
+  //Broadcasting a message to everyone when someone enter the chat room
+  clients.map((client) => {
+    client.socket.write(`User ${clientId} Joined!`);
+  });
+
   socket.write(`id-${clientId}`);
 
   socket.on('data', (data) => {
@@ -25,6 +30,20 @@ server.on('connection', (socket) => {
     });
   });
 
+  //Broadcasting a message to everyone when someone leaves the chat room
+  socket.on('end', () => {
+    handleClientLeave();
+  });
+
+  socket.on('error', () => {
+    handleClientLeave();
+  });
+
+  const handleClientLeave = () => {
+    clients.map((client) => {
+      client.socket.write(`User ${clientId} left!`);
+    });
+  };
   clients.push({ id: clientId.toString(), socket });
 });
 
